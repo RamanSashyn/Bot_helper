@@ -7,12 +7,11 @@ from google.cloud import dialogflow_v2 as dialogflow
 
 
 load_dotenv()
+PROJECT_ID = os.getenv("PROJECT_ID")
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
-PROJECT_ID = os.getenv("PROJECT_ID")
 
 
 def detect_intent_text(project_id, session_id, text, language_code="ru"):
