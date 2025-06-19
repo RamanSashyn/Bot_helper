@@ -4,14 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from google.cloud import dialogflow_v2 as dialogflow
-
-
-load_dotenv()
-PROJECT_ID = os.getenv("PROJECT_ID")
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+from logger_config import configure_logger
 
 
 def detect_intent_text(project_id, session_id, text, language_code="ru"):
@@ -41,11 +34,18 @@ def handle_message(update: Update, context: CallbackContext):
         update.message.reply_text(reply)
     except Exception as e:
         logging.error(f"Ошибка при обращении к DialogFlow: {e}")
-        update.message.reply_text("Произошла ошибка при обработке. Попробуй ещё раз.")
 
 
 def main():
-    updater = Updater("8026982807:AAGVWzX3K7hkgL3q-wXDMoD5fhBL5cMWVmc")
+    load_dotenv()
+    telegram_token = os.getenv("TELEGRAM_TOKEN")
+    tg_chat_id = os.getenv("TG_CHAT_ID")
+    global PROJECT_ID
+    PROJECT_ID = os.getenv("PROJECT_ID")
+
+    configure_logger(telegram_token, tg_chat_id)
+
+    updater = Updater(telegram_token)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))

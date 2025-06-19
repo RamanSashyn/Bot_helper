@@ -1,10 +1,11 @@
 import os
 import random
-
+import logging
 from dotenv import load_dotenv
 from google.cloud import dialogflow_v2 as dialogflow
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
+from logger_config import configure_logger
 
 
 def detect_intent_texts(project_id, session_id, text, language_code="ru"):
@@ -21,29 +22,49 @@ def detect_intent_texts(project_id, session_id, text, language_code="ru"):
     return response.query_result
 
 
-if __name__ == "__main__":
+def main():
     load_dotenv()
 
-    VK_API_TOKEN = os.getenv("VK_API_TOKEN")
-    PROJECT_ID = os.getenv("PROJECT_ID")
+    vk_token = os.getenv("VK_API_TOKEN")
+    project_id = os.getenv("PROJECT_ID")
+    tg_token = os.getenv("TELEGRAM_TOKEN")
+    tg_chat_id = os.getenv("TG_CHAT_ID")
 
-    vk_session = vk_api.VkApi(token=VK_API_TOKEN)
-    vk_api_instance = vk_session.get_api()
-    longpoll = VkLongPoll(vk_session, preload_messages=True)
+    configure_logger(tg_token, tg_chat_id)
+    logger = logging.getLogger(__name__)
+    logger.info("VK бот запускается...")
 
-    for event in longpoll.listen():
-        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-            result = detect_intent_texts(
-                project_id=PROJECT_ID,
-                session_id=event.user_id,
-                text=event.text
-            )
+    try:
+        vk_session = vk_api.VkApi(token=vk_token)
+        vk_api_instance = vk_session.get_api()
+        longpoll = VkLongPoll(vk_session, preload_messages=True)
 
-            if result.intent.is_fallback:
-                continue
+        logger.info("VK бот успешно запущен и слушает сообщения")
 
-            vk_api_instance.messages.send(
-                user_id=event.user_id,
-                message=result.fulfillment_text,
-                random_id=random.randint(1, 1000),
-            )
+        for event in longpoll.listen():
+            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                user_id = event.user_id
+                text = event.text
+
+                try:
+                    result = detect_intent_texts(project_id, user_id, text)
+                    if result.intent.is_fallback:
+                        logger.info(f"FALLBACK: '{text}' от {user_id}")
+                        continue
+
+                    vk_api_instance.messages.send(
+                        user_id=user_id,
+                        message=result.fulfillment_text,
+                        random_id=random.randint(1, 100000)
+                    )
+                    logger.info(f"Ответ отправлен пользователю {user_id}")
+
+                except Exception as error:
+                    logger.exception(f"Ошибка при обработке сообщения от {user_id}: {error}")
+
+    except Exception as startup_error:
+        logger.exception(f"Ошибка при запуске VK бота: {startup_error}")
+
+
+if __name__ == "__main__":
+    main()
