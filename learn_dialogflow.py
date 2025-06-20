@@ -31,10 +31,10 @@ def main():
     load_dotenv()
     project_id = os.getenv("PROJECT_ID")
 
-    with open("questions.json", encoding="utf-8") as f:
-        data = json.load(f)
+    with open("questions.json", encoding="utf-8") as file:
+        training_phrases_by_intent = json.load(file)
 
-    for intent_name, content in data.items():
+    for intent_name, content in training_phrases_by_intent.items():
         questions = content["questions"]
         answer = content["answer"]
 

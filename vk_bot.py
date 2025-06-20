@@ -47,14 +47,14 @@ def main():
                 text = event.text
 
                 try:
-                    result = detect_intent_texts(project_id, user_id, text)
-                    if result.intent.is_fallback:
+                    dialogflow_response = detect_intent_texts(project_id, user_id, text)
+                    if dialogflow_response.intent.is_fallback:
                         logger.info(f"FALLBACK: '{text}' от {user_id}")
                         continue
 
                     vk_api_instance.messages.send(
                         user_id=user_id,
-                        message=result.fulfillment_text,
+                        message=dialogflow_response.fulfillment_text,
                         random_id=random.randint(1, 100000)
                     )
                     logger.info(f"Ответ отправлен пользователю {user_id}")
