@@ -6,20 +6,7 @@ from google.cloud import dialogflow_v2 as dialogflow
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from logger_config import configure_logger
-
-
-def detect_intent_texts(project_id, session_id, text, language_code="ru"):
-    session_client = dialogflow.SessionsClient()
-    session = session_client.session_path(project_id, session_id)
-
-    text_input = dialogflow.TextInput(text=text, language_code=language_code)
-    query_input = dialogflow.QueryInput(text=text_input)
-
-    response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
-    )
-
-    return response.query_result
+from dialogflow_api import detect_intent
 
 
 def main():
@@ -47,7 +34,7 @@ def main():
                 text = event.text
 
                 try:
-                    dialogflow_response = detect_intent_texts(project_id, user_id, text)
+                    dialogflow_response = detect_intent(project_id, user_id, text)
                     if dialogflow_response.intent.is_fallback:
                         logger.info(f"FALLBACK: '{text}' от {user_id}")
                         continue

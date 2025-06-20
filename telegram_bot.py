@@ -5,20 +5,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from google.cloud import dialogflow_v2 as dialogflow
 from logger_config import configure_logger
-
-
-def detect_intent_text(project_id, session_id, text, language_code="ru"):
-    session_client = dialogflow.SessionsClient()
-    session = session_client.session_path(project_id, session_id)
-
-    text_input = dialogflow.TextInput(text=text, language_code=language_code)
-    query_input = dialogflow.QueryInput(text=text_input)
-
-    response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
-    )
-
-    return response.query_result.fulfillment_text
+from dialogflow_api import detect_intent
 
 
 def start(update: Update, context: CallbackContext):
@@ -30,7 +17,7 @@ def handle_message(update: Update, context: CallbackContext):
     chat_id = str(update.message.chat_id)
 
     try:
-        reply = detect_intent_text(project_id, chat_id, user_text)
+        reply = detect_intent(project_id, chat_id, user_text).fulfillment_text
         update.message.reply_text(reply)
     except Exception as e:
         logging.error(f"Ошибка при обращении к DialogFlow: {e}")
