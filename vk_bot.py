@@ -2,7 +2,6 @@ import os
 import random
 import logging
 from dotenv import load_dotenv
-from google.cloud import dialogflow_v2 as dialogflow
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from logger_config import configure_logger
@@ -30,24 +29,24 @@ def main():
 
         for event in longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                user_id = event.user_id
+                session_id = f"vk-{event.user_id}"
                 text = event.text
 
                 try:
-                    dialogflow_response = detect_intent(project_id, user_id, text)
+                    dialogflow_response = detect_intent(project_id, session_id, text)
                     if dialogflow_response.intent.is_fallback:
-                        logger.info(f"FALLBACK: '{text}' от {user_id}")
+                        logger.info(f"FALLBACK: '{text}' от {event.user_id}")
                         continue
 
                     vk_api_instance.messages.send(
-                        user_id=user_id,
+                        user_id=event.user_id,
                         message=dialogflow_response.fulfillment_text,
                         random_id=random.randint(1, 100000)
                     )
-                    logger.info(f"Ответ отправлен пользователю {user_id}")
+                    logger.info(f"Ответ отправлен пользователю {event.user_id}")
 
                 except Exception as error:
-                    logger.exception(f"Ошибка при обработке сообщения от {user_id}: {error}")
+                    logger.exception(f"Ошибка при обработке сообщения от {event.user_id}: {error}")
 
     except Exception as startup_error:
         logger.exception(f"Ошибка при запуске VK бота: {startup_error}")

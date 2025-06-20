@@ -3,7 +3,6 @@ import logging
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from google.cloud import dialogflow_v2 as dialogflow
 from logger_config import configure_logger
 from dialogflow_api import detect_intent
 
@@ -14,10 +13,10 @@ def start(update: Update, context: CallbackContext):
 
 def handle_message(update: Update, context: CallbackContext):
     user_text = update.message.text
-    chat_id = str(update.message.chat_id)
+    session_id = f"tg-{update.message.chat_id}"
 
     try:
-        reply = detect_intent(project_id, chat_id, user_text).fulfillment_text
+        reply = detect_intent(project_id, session_id, user_text).fulfillment_text
         update.message.reply_text(reply)
     except Exception:
         logging.exception(f"Ошибка при обращении к DialogFlow")
