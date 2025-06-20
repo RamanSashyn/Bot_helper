@@ -1,5 +1,5 @@
 python-telegram-bot==13.15
-google-cloud-dialogflow
-python-dotenv
-vk_api
+google-cloud-dialogflow==2.41.2
+python-dotenv==1.1.0
+vk_api==11.9.9
 
