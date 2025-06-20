@@ -30,7 +30,7 @@ def handle_message(update: Update, context: CallbackContext):
     chat_id = str(update.message.chat_id)
 
     try:
-        reply = detect_intent_text(PROJECT_ID, chat_id, user_text)
+        reply = detect_intent_text(project_id, chat_id, user_text)
         update.message.reply_text(reply)
     except Exception as e:
         logging.error(f"Ошибка при обращении к DialogFlow: {e}")
@@ -40,8 +40,8 @@ def main():
     load_dotenv()
     telegram_token = os.getenv("TELEGRAM_TOKEN")
     tg_chat_id = os.getenv("TG_CHAT_ID")
-    global PROJECT_ID
-    PROJECT_ID = os.getenv("PROJECT_ID")
+    global project_id
+    project_id = os.getenv("PROJECT_ID")
 
     configure_logger(telegram_token, tg_chat_id)
 
