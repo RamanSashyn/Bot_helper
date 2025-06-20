@@ -24,12 +24,13 @@ def create_intent(project_id, display_name, training_phrases_parts, message_text
     )
 
     response = client.create_intent(request={"parent": parent, "intent": intent})
-    print(f"Intent created: {response.display_name}")
+    return response.display_name
 
 
 def main():
     load_dotenv()
-    PROJECT_ID = os.getenv("PROJECT_ID")
+    project_id = os.getenv("PROJECT_ID")
+
     with open("questions.json", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -37,12 +38,13 @@ def main():
         questions = content["questions"]
         answer = content["answer"]
 
-        create_intent(
-            project_id=PROJECT_ID,
+        created_name = create_intent(
+            project_id=project_id,
             display_name=intent_name,
             training_phrases_parts=questions,
             message_texts=[answer]
         )
+        print(f"Intent created: {created_name}")
 
 
 if __name__ == '__main__':
