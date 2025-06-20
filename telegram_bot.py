@@ -19,8 +19,8 @@ def handle_message(update: Update, context: CallbackContext):
     try:
         reply = detect_intent(project_id, chat_id, user_text).fulfillment_text
         update.message.reply_text(reply)
-    except Exception as e:
-        logging.error(f"Ошибка при обращении к DialogFlow: {e}")
+    except Exception:
+        logging.exception(f"Ошибка при обращении к DialogFlow")
 
 
 def main():
